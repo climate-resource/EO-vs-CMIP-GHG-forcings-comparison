@@ -8,3 +8,6 @@ eo_vs_cmip_ghg_forcings_comparison.egg-info/SOURCES.txt
 eo_vs_cmip_ghg_forcings_comparison.egg-info/dependency_links.txt
 eo_vs_cmip_ghg_forcings_comparison.egg-info/requires.txt
 eo_vs_cmip_ghg_forcings_comparison.egg-info/top_level.txt
+plotting/__init__.py
+plotting/initial_plots.py
+plotting/utils.py

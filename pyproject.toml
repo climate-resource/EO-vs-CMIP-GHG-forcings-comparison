@@ -4,5 +4,12 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.11"
 dynamic = ["dependencies"]
+license = "BSD-3-Clause"
+readme = "README.md"
+
+
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools]
+packages = ["data", "plotting"]
