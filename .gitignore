@@ -2,6 +2,10 @@
 *.csv
 *.nc
 
+# ignore template files
+*.odg
+
+# ignore folders
 /.venv/
 /build/
 /.idea/

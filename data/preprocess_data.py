@@ -64,7 +64,7 @@ def preprocess_obs4mips_data(
         d.loc[d[d.lat_bnds.isin(old_lat)].index, "lat_bnds"] = new_lat
 
     # select relevant columns
-    d_final = d[["time","lat_bnds", gas, f"x{gas}_nobs"]].reset_index()
+    d_final = d[["time","lat_bnds", gas, f"x{gas}_nobs", "lat"]].reset_index()
     return d_final
 
 
