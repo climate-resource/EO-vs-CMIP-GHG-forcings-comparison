@@ -1,0 +1,79 @@
+#######
+# PSEUDO MAKEFILE
+# this is a pseudo MAKEFILE for recording the workflow for
+# downloading the ground-based input4MIPS data from esgf.
+# The focus here is on downloading  monthly CH4, CO2 data from
+# the input4MIPs project, CMIP7 era, in the gnz format
+#######
+
+# create environment
+uv venv --python 3.11
+
+# activate environment
+.venv/Scripts/activate
+
+# install esgpull
+uv pip install git+https://github.com/ESGF/esgf-download
+uv run esgpull self install
+
+# configure esgpull
+uv run esgpull config api.index_node esgf-node.llnl.gov
+
+# search for data set from input4MIPs project, monthly co2 data
+esgpull search project:input4MIPs variable_id:ch4,co2 frequency:mon grid_label:gnz mip_era:CMIP7
+# output:
+# Found 2 datasets.
+#  id │                              dataset                               │ # │  size
+# ════╪════════════════════════════════════════════════════════════════════╪═══╪═════════
+#   0 │ input4MIPs.CMIP7.CMIP.CR.CR-CMIP-1-0-0.atmos.mon.ch4.gnz.v20250228 │ 3 │ 3.9 MiB
+#   1 │ input4MIPs.CMIP7.CMIP.CR.CR-CMIP-1-0-0.atmos.mon.co2.gnz.v20250228 │ 3 │ 3.9 MiB
+
+
+# add data to query list
+esgpull add project:input4MIPs variable_id:ch4,co2 frequency:mon grid_label:gnz mip_era:CMIP7 --track
+# output:
+# <b73021>
+# └── distrib:     False
+#     latest:      True
+#     replica:     None
+#     retracted:   False
+#     frequency:   mon
+#     grid_label:  gnz
+#     mip_era:     CMIP7
+#     project:     input4MIPs
+#                  search
+#     variable_id: ch4, co2
+# New query added: <620c8b>
+# 👍 1 new query added.
+
+
+# update queries
+esgpull update 620c8b -y
+# output:
+# <620c8b> -> 6 files.
+# 6 files found.
+# Send to download queue? [y/n/show]: y
+# <620c8b> ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00e
+
+# download data in cue
+esgpull download 620c8b
+# output:
+# <620c8b>
+# └── distrib:     False
+#     latest:      True
+#     replica:     None
+#     retracted:   False
+#     frequency:   mon
+#     grid_label:  gnz
+#     mip_era:     CMIP7
+#     project:     input4MIPs
+#     variable_id: ch4, co2
+#     files:       0 bytes / 7.9 MiB [0/6]
+# <069d12> · 560.7 kiB · 306.5 kiB/s · esgf-data2.llnl.gov
+# <3eff37> · 556.5 kiB · 291.8 kiB/s · esgf-data2.llnl.gov
+# <d74d71> · 1.5 MiB · 2.1 MiB/s · esgf-data2.llnl.gov
+# <a7f505> · 1.9 MiB · 716.7 kiB/s · esgf-data2.llnl.gov
+# <93d236> · 1.5 MiB · 486.4 kiB/s · esgf-data2.llnl.gov
+# <cc5bc3> · 1.9 MiB · 477.0 kiB/s · esgf-data2.llnl.gov
+#  6/6 00:04
+# Downloaded 6 new files for a total size of 7.9 MiB
