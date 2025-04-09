@@ -1,0 +1,8 @@
+# ignore datasets
+*.csv
+*.nc
+
+/.venv/
+/build/
+/.idea/
+/data/
