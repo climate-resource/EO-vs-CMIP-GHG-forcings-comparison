@@ -1,5 +1,5 @@
 """
-helper functions for preparing data for src_plotting
+helper functions for preparing data for src
 """
 
 import pandas as pd
@@ -171,7 +171,7 @@ def prepare_data(
         year_max: Optional[int] = None,
 ) -> tuple[pd.DataFrame]:
     """
-    preprocess dataframe for src_plotting
+    preprocess dataframe for src
 
     Parameters
     ----------
@@ -200,7 +200,7 @@ def prepare_data(
     Returns
     -------
     df_plotting :
-        preprocessed dataframe ready for src_plotting
+        preprocessed dataframe ready for src
 
     df_global_mean :
         averaged over all latitudes

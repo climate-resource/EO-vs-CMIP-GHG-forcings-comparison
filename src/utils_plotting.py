@@ -1,5 +1,5 @@
 """
-helper functions for src_plotting
+helper functions for src
 """
 
 import seaborn as sns
