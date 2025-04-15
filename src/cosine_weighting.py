@@ -10,8 +10,10 @@ def compute_weighted_ghg(
         df_filtered[f"x{gas}"] = df_filtered[f"x{gas}"] * unit_factor
 
         # step 2: average over longitudes
-        df_lat = df_filtered.groupby(["year", "month", "day", "bnds", "lat", "lat_bnds"]).agg({f"x{gas}": "mean"}).reset_index()
-        df_lat.head()
+        df_lat = df_filtered.groupby(
+            ["year", "month", "day", "year_month" ,"bnds", "lat", "lat_bnds"]
+        ).agg({f"x{gas}": "mean"}).reset_index()
+
     else:
         df_lat = df
         df_lat.rename(columns={f"{gas}": f"x{gas}"}, inplace=True)
@@ -31,7 +33,7 @@ def compute_weighted_average_latitude_bands(
 ) -> pd.DataFrame:
     # step 4: compute weighted average over latitudes to get a value for each latitude bound
     df_lat_avg = df_weighted.groupby(
-        ["year", "month", "day", "lat_bnds"]
+        ["year", "month", "day", "year_month","lat_bnds"]
     ).agg(
         {f"x{gas}_weighted": "sum", "delta_phi": "sum"}
     ).reset_index()

@@ -15,6 +15,7 @@ def load_data(
     df_raw["year"] = df_raw.time.dt.year
     df_raw["month"] = df_raw.time.dt.month
     df_raw["day"] = df_raw.time.dt.day
+    df_raw["year_month"] = df_raw["year"].astype(int).astype(str) + "_" + df_raw["month"].astype(int).astype(str)
 
     if year_max < np.min(df_raw["year"]):
         raise ValueError(f"{year_max=} is smaller than minimum observed year {np.min(df_raw['time'])}")
@@ -50,8 +51,17 @@ def resize_grid(
             (df_duplicate.bnds==i%(len(lat_bnds_seq)-1)),
             f"{lat_bnds_seq[i]}-{lat_bnds_seq[i+1]}-S", df_duplicate.lat_bnd)
 
-    df_gridded = df_duplicate.groupby(["year", "month", "day", "lat_bnd"]).agg(
+    df_gridded = df_duplicate.groupby(["year", "month", "day", "year_month", "lat_bnd"]).agg(
         {f"x{gas}_weighted_avg":"mean"}
     ).reset_index()
 
     return df_gridded
+
+
+def combine_dataset(d1, d2, gas):
+    d1_agg = d1.groupby(["year_month", "lat_bnds"]).agg({gas: "mean"}).reset_index()
+    d2_agg = d2.groupby(["year_month", "lat_bnds", f"x{gas}_nobs"]).agg({gas: "mean"}).reset_index()
+    d2_agg.rename(columns={gas: f"x{gas}"}, inplace=True)
+
+    d_combined = pd.merge(d1_agg, d2_agg, how="outer")
+    return d_combined
