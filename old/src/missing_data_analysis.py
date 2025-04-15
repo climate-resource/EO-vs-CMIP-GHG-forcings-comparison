@@ -93,19 +93,6 @@ def plot_missing(
         gas: str,
         **kwargs
 ) -> None:
-    """
-    plot missing data when comparing cimp7 and obs4mips
-
-    Parameters
-    ----------
-    counts
-        preprocessed dataframe with informaiton about
-        missing data
-
-    gas
-        ghg variable, either ch4 or co2
-
-    """
     fig, axs = plt.subplots(constrained_layout=True, **kwargs)
     sns.scatterplot(
         x=counts.year_month.astype(str),

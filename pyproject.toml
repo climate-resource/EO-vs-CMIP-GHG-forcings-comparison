@@ -12,4 +12,4 @@ readme = "README.md"
 dependencies = {file = ["requirements.txt"]}
 
 [tool.setuptools]
-packages = ["data", "src_plotting"]
+packages = ["data", "src", "src2"]

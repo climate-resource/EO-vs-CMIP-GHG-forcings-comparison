@@ -4,22 +4,23 @@ This repository contains all code for creating a figure that compares ground-bas
 satellite OBS4MIPs data. 
 
 ### Workflow
+Current idea of preprocessing data is explained in [tutorial: getting-started_ch4](tutorials/getting-started_ch4.ipynb)
+
+In summary:
 
 + download $CH_4$ and $CO_2$ data products retrieved from 
   + CIMP7 v1.0.0 as provided via esgf (see [pseudo MAKEFILE](data/MAKEFILE) for workflow)
   + OBS4MIPs v4.5 as provided via CDS (see [CO2](https://cds.climate.copernicus.eu/datasets/satellite-carbon-dioxide?tab=overview)
   & [CH4](https://cds.climate.copernicus.eu/datasets/satellite-methane?tab=overview))
-+ exploratory analysis of CIMP7 data 
-  + see [tutorial: CIMP7 data](tutorials/CMIP7-v1.0.0.ipynb)
-  + closer look at cosine-weighting (see [tutorial: cosine-weighting](tutorials/cosine-weighting.ipynb)) 
-+ preprocessing OBS4MIPS data
-  + merge latitudinal grids of OBS4MIPs data to be consistent with 15° gridding of CIMP7 data
-+ check missing data when comparing CIMP7 and OBS4MIPs data on a monthly basis (see [tutorial: missing data](tutorials/missing-data.ipynb))
++ analyse missing values
++ average over longitudes
++ compute weighted average for each latitude band
++ resize grid if needed by averaging the weighted averages of each latitude band
 
 ### Questions/Notes
 
-+ Why is cosine-weighting not required for earth observations?
-+ We should go over the cosine-weighting implementation again and check it ([cosine_weighting.py](src/cosine_weighting.py)) 
++ why do we focus only on latitude bands? Regional aspects are ignored?
++ validity of approach for resizing grid should be discussed  
 
 ### Note
 Work on this repo is currently in progress. 

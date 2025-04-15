@@ -1,90 +1,36 @@
-import pandas as pd
-import xarray as xr
 import numpy as np
+import pandas as pd
 
-
-def weight_and_average(
-        dataarray: xr.DataArray,
-        weight_method: str,  # "cosine" or "unweighted"
-) -> xr.DataArray:
-    """
-    Cosine weighting and averaging along the latitudes
-
-    Parameters
-    ----------
-    dataarray
-        data array of ghg variable
-
-    weight_method
-        either "cosine" or "unweighted"
-
-    Returns
-    -------
-    :
-        data array with cosine-weighted and averaged
-        values of the ghg variable
-    """
-    if weight_method == "cosine":
-        weights = np.cos(np.deg2rad(dataarray.lat))
-    elif weight_method == "unweighted":
-        weights = xr.ones_like(dataarray.lat)
-    else:
-        raise ValueError("weight_method must be either 'cosine' or 'unweighted'")
-
-    weighted_array = dataarray.weighted(weights)
-    return weighted_array.mean("lat")
-
-
-def preprocessed_dataframe(
-        ds: xr.Dataset,
-        lat_slices: list,
-        year_slices: list[str],
-        weight_method: str = "cosine",  # or "unweighted"
+def compute_weighted_ghg(
+        df: pd.DataFrame, gas:str, unit_factor: float, fill_values:float=1e20, cell_size: int=5
 ) -> pd.DataFrame:
-    """
-    Prepares dataframe for plotting
+    # step 1: prepare the data
+    df_filtered = df[df[f"x{gas}"] != fill_values].reset_index(drop=True)
+    df_filtered[f"x{gas}"] = df_filtered[f"x{gas}"] * unit_factor
 
-    includes selecting time range, averaging over latitudes
-    and averaging using cosine-weighting
+    # step 2: average over longitudes
+    df_lat = df_filtered.groupby(["year", "month", "day", "bnds", "lat", "lat_bnds"]).agg({f"x{gas}": "mean"}).reset_index()
+    df_lat.head()
 
-    Parameters
-    ----------
-    ds
-        Dataset of ghg variable
+    # step 3: compute weights wrt bounding latitudes and compute weighted ghg variable
+    df_lat.loc[df_lat.lat.index, "delta_phi"] = abs(np.subtract(
+        np.sin(df_lat.lat + (cell_size/2)), # upper bounding latitude
+        np.sin(df_lat.lat - (cell_size/2))  # lower bounding latitude
+    ))
+    df_lat[f"x{gas}_weighted"] = df_lat[f"x{gas}"].multiply(df_lat.delta_phi)
 
-    lat_slices
-        Array including latitude slices
+    return df_lat
 
-    year_slices
-        List with start and end year
 
-    weight_method
-        Which weighting method should be used? Either
-        "cosine" or "unweighted"
+def compute_weighted_average_latitude_bands(
+        df_weighted: pd.DataFrame, gas: str
+) -> pd.DataFrame:
+    # step 4: compute weighted average over latitudes to get a value for each latitude bound
+    df_lat_avg = df_weighted.groupby(
+        ["year", "month", "day", "lat_bnds"]
+    ).agg(
+        {f"x{gas}_weighted": "sum", "delta_phi": "sum"}
+    ).reset_index()
 
-    Returns
-    -------
-    :
-        Dataframe of ghg variable
-    """
-    combine_latitude_slices = []
-    for lat_slice in lat_slices:
-        # filter relevant years
-        ch4_date_range = ds.ch4.sel(
-            lat=slice(lat_slice[0], lat_slice[1]),
-            time=slice(year_slices[0], year_slices[1])
-        )
-        # weighted average along latitudes
-        ch4_weighted_average = weight_and_average(
-            ch4_date_range, weight_method=weight_method)
-        ch4_weighted_average["lat_bnd"] = str(lat_slice)
-        combine_latitude_slices.append(ch4_weighted_average)
-
-    ch4_weighted_combined = xr.concat(
-        combine_latitude_slices, dim="lat"
-    )
-    ch4_weighted_combined["time"] = ch4_weighted_combined.indexes['time'].to_datetimeindex()
-
-    ch4_data_frame = ch4_weighted_combined.to_dataframe().reset_index()
-    ch4_data_frame["time"] = ch4_data_frame.time.astype("datetime64[ns]")
-    return ch4_data_frame
+    df_lat_avg.loc[df_lat_avg.index, f"x{gas}_weighted_avg"] = df_lat_avg[f"x{gas}_weighted"]/df_lat_avg.delta_phi
+    return df_lat_avg
