@@ -2,15 +2,19 @@ import numpy as np
 import pandas as pd
 
 def compute_weighted_ghg(
-        df: pd.DataFrame, gas:str, unit_factor: float, fill_values:float=1e20, cell_size: int=5
+        df: pd.DataFrame, gas:str, unit_factor: float, cmip_data:bool, fill_values:float=1e20, cell_size: int=5
 ) -> pd.DataFrame:
-    # step 1: prepare the data
-    df_filtered = df[df[f"x{gas}"] != fill_values].reset_index(drop=True)
-    df_filtered[f"x{gas}"] = df_filtered[f"x{gas}"] * unit_factor
+    if not cmip_data:
+        # step 1: prepare the data
+        df_filtered = df[df[f"x{gas}"] != fill_values].reset_index(drop=True)
+        df_filtered[f"x{gas}"] = df_filtered[f"x{gas}"] * unit_factor
 
-    # step 2: average over longitudes
-    df_lat = df_filtered.groupby(["year", "month", "day", "bnds", "lat", "lat_bnds"]).agg({f"x{gas}": "mean"}).reset_index()
-    df_lat.head()
+        # step 2: average over longitudes
+        df_lat = df_filtered.groupby(["year", "month", "day", "bnds", "lat", "lat_bnds"]).agg({f"x{gas}": "mean"}).reset_index()
+        df_lat.head()
+    else:
+        df_lat = df
+        df_lat.rename(columns={f"{gas}": f"x{gas}"}, inplace=True)
 
     # step 3: compute weights wrt bounding latitudes and compute weighted ghg variable
     df_lat.loc[df_lat.lat.index, "delta_phi"] = abs(np.subtract(
