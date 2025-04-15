@@ -4,7 +4,8 @@ This repository contains all code for creating a figure that compares ground-bas
 satellite OBS4MIPs data. 
 
 ### Workflow
-Current idea of preprocessing data is explained in [tutorial: getting-started_ch4](tutorials/getting-started_ch4.ipynb)
+Current idea of preprocessing data is explained in [tutorial: getting-started_ch4](tutorials/getting-started_ch4.ipynb) 
+and [tutorial: getting-started_co2](tutorials/getting-started_co2.ipynb)
 
 In summary:
 
