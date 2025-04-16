@@ -58,10 +58,18 @@ def resize_grid(
     return df_gridded
 
 
-def combine_dataset(d1, d2, gas):
-    d1_agg = d1.groupby(["year_month", "lat_bnds"]).agg({gas: "mean"}).reset_index()
-    d2_agg = d2.groupby(["year_month", "lat_bnds", f"x{gas}_nobs"]).agg({gas: "mean"}).reset_index()
-    d2_agg.rename(columns={gas: f"x{gas}"}, inplace=True)
+def combine_dataset(df_obs4mips, df_cmip7, gas):
 
-    d_combined = pd.merge(d1_agg, d2_agg, how="outer")
-    return d_combined
+    df_obs4mips["source"] = "obs4mips"
+    df_cmip7["source"] = "cmip7"
+
+    df_combined = pd.merge(
+        df_obs4mips[["year_month", "lat_bnd", f"x{gas}_weighted_avg", "source"]],
+        df_cmip7[["year_month", "lat_bnd", f"x{gas}_weighted_avg", "source"]],
+        how="outer")
+
+    df = df_combined.pivot(columns="source", index=("year_month", "lat_bnd"),
+                           values=f"x{gas}_weighted_avg").reset_index()
+    df_clean = df.dropna()
+
+    return df_clean
